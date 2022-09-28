@@ -1,4 +1,4 @@
-"""Support to manage a shopping list."""
+"""Support to manage a tracking list."""
 from http import HTTPStatus
 import logging
 import uuid
