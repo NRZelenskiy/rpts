@@ -17,7 +17,7 @@ from homeassistant.util.json import load_json, save_json
 
 from .const import (
     DOMAIN,
-    EVENT_SHOPPING_LIST_UPDATED,
+    EVENT_TRACKING_LIST_UPDATED,
     SERVICE_ADD_ITEM,
     SERVICE_CLEAR_COMPLETED_ITEMS,
     SERVICE_COMPLETE_ALL,
@@ -36,22 +36,22 @@ PERSISTENCE = ".shopping_list.json"
 SERVICE_ITEM_SCHEMA = vol.Schema({vol.Required(ATTR_NAME): vol.Any(None, cv.string)})
 SERVICE_LIST_SCHEMA = vol.Schema({})
 
-WS_TYPE_SHOPPING_LIST_ITEMS = "shopping_list/items"
-WS_TYPE_SHOPPING_LIST_ADD_ITEM = "shopping_list/items/add"
-WS_TYPE_SHOPPING_LIST_UPDATE_ITEM = "shopping_list/items/update"
-WS_TYPE_SHOPPING_LIST_CLEAR_ITEMS = "shopping_list/items/clear"
+WS_TYPE_TRACKING_LIST_ITEMS = "tracking_list/items"
+WS_TYPE_TRACKING_LIST_ADD_ITEM = "tracking_list/items/add"
+WS_TYPE_TRACKING_LIST_UPDATE_ITEM = "trackingg_list/items/update"
+WS_TYPE_TRACKING_LIST_CLEAR_ITEMS = "tracking_list/items/clear"
 
 SCHEMA_WEBSOCKET_ITEMS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
     {vol.Required("type"): WS_TYPE_SHOPPING_LIST_ITEMS}
 )
 
 SCHEMA_WEBSOCKET_ADD_ITEM = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SHOPPING_LIST_ADD_ITEM, vol.Required("name"): str}
+    {vol.Required("type"): WS_TYPE_TRACKING_LIST_ADD_ITEM, vol.Required("name"): str}
 )
 
 SCHEMA_WEBSOCKET_UPDATE_ITEM = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
     {
-        vol.Required("type"): WS_TYPE_SHOPPING_LIST_UPDATE_ITEM,
+        vol.Required("type"): WS_TYPE_TRACKING_LIST_UPDATE_ITEM,
         vol.Required("item_id"): str,
         vol.Optional("name"): str,
         vol.Optional("complete"): bool,
@@ -59,12 +59,12 @@ SCHEMA_WEBSOCKET_UPDATE_ITEM = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
 )
 
 SCHEMA_WEBSOCKET_CLEAR_ITEMS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SHOPPING_LIST_CLEAR_ITEMS}
+    {vol.Required("type"): WS_TYPE_TRACKING_LIST_CLEAR_ITEMS}
 )
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Initialize the shopping list."""
+    """Initialize the tracking list."""
 
     if DOMAIN not in config:
         return True
@@ -79,7 +79,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Set up shopping list from config flow."""
+    """Set up tracking list from config flow."""
 
     async def add_item_service(call: ServiceCall) -> None:
         """Add an item with `name`."""
@@ -123,7 +123,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         """Clear all completed items from the list."""
         await data.async_clear_completed()
 
-    data = hass.data[DOMAIN] = ShoppingData(hass)
+    data = hass.data[DOMAIN] = TrackingData(hass)
     await data.async_load()
 
     hass.services.async_register(
@@ -157,9 +157,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         schema=SERVICE_LIST_SCHEMA,
     )
 
-    hass.http.register_view(ShoppingListView)
-    hass.http.register_view(CreateShoppingListItemView)
-    hass.http.register_view(UpdateShoppingListItemView)
+    hass.http.register_view(TrackingListView)
+    hass.http.register_view(CreateTrackingListItemView)
+    hass.http.register_view(UpdateTrackingListItemView)
     hass.http.register_view(ClearCompletedItemsView)
 
     frontend.async_register_built_in_panel(
@@ -168,25 +168,25 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     websocket_api.async_register_command(
         hass,
-        WS_TYPE_SHOPPING_LIST_ITEMS,
+        WS_TYPE_TRACKING_LIST_ITEMS,
         websocket_handle_items,
         SCHEMA_WEBSOCKET_ITEMS,
     )
     websocket_api.async_register_command(
         hass,
-        WS_TYPE_SHOPPING_LIST_ADD_ITEM,
+        WS_TYPE_TRACKING_LIST_ADD_ITEM,
         websocket_handle_add,
         SCHEMA_WEBSOCKET_ADD_ITEM,
     )
     websocket_api.async_register_command(
         hass,
-        WS_TYPE_SHOPPING_LIST_UPDATE_ITEM,
+        WS_TYPE_TRACKING_LIST_UPDATE_ITEM,
         websocket_handle_update,
         SCHEMA_WEBSOCKET_UPDATE_ITEM,
     )
     websocket_api.async_register_command(
         hass,
-        WS_TYPE_SHOPPING_LIST_CLEAR_ITEMS,
+        WS_TYPE_TRACKING_LIST_CLEAR_ITEMS,
         websocket_handle_clear,
         SCHEMA_WEBSOCKET_CLEAR_ITEMS,
     )
@@ -196,21 +196,21 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     return True
 
 
-class ShoppingData:
-    """Class to hold shopping list data."""
+class TrackingData:
+    """Class to hold tracking list data."""
 
     def __init__(self, hass):
-        """Initialize the shopping list."""
+        """Initialize the tracking list."""
         self.hass = hass
         self.items = []
 
     async def async_add(self, name, context=None):
-        """Add a shopping list item."""
+        """Add a tracking list item."""
         item = {"name": name, "id": uuid.uuid4().hex, "complete": False}
         self.items.append(item)
         await self.hass.async_add_executor_job(self.save)
         self.hass.bus.async_fire(
-            EVENT_SHOPPING_LIST_UPDATED,
+            EVENT_TRACKING_LIST_UPDATED,
             {"action": "add", "item": item},
             context=context,
         )
@@ -227,7 +227,7 @@ class ShoppingData:
         item.update(info)
         await self.hass.async_add_executor_job(self.save)
         self.hass.bus.async_fire(
-            EVENT_SHOPPING_LIST_UPDATED,
+            EVENT_TRACKING_LIST_UPDATED,
             {"action": "update", "item": item},
             context=context,
         )
@@ -238,7 +238,7 @@ class ShoppingData:
         self.items = [itm for itm in self.items if not itm["complete"]]
         await self.hass.async_add_executor_job(self.save)
         self.hass.bus.async_fire(
-            EVENT_SHOPPING_LIST_UPDATED,
+            EVENT_TRACKING_LIST_UPDATED,
             {"action": "clear"},
             context=context,
         )
@@ -249,7 +249,7 @@ class ShoppingData:
             item.update(info)
         await self.hass.async_add_executor_job(self.save)
         self.hass.bus.async_fire(
-            EVENT_SHOPPING_LIST_UPDATED,
+            EVENT_TRACKING_LIST_UPDATED,
             {"action": "update_list"},
             context=context,
         )
@@ -274,13 +274,13 @@ class ShoppingData:
             # so all items left in the mapping should be checked items.
             if all_items_mapping[key]["complete"] is False:
                 raise vol.Invalid(
-                    "The item ids array doesn't contain all the unchecked shopping list items."
+                    "The item ids array doesn't contain all the unchecked tracking list items."
                 )
             new_items.append(all_items_mapping[key])
         self.items = new_items
         self.hass.async_add_executor_job(self.save)
         self.hass.bus.async_fire(
-            EVENT_SHOPPING_LIST_UPDATED,
+            EVENT_TRACKING_LIST_UPDATED,
             {"action": "reorder"},
             context=context,
         )
@@ -299,26 +299,26 @@ class ShoppingData:
         save_json(self.hass.config.path(PERSISTENCE), self.items)
 
 
-class ShoppingListView(http.HomeAssistantView):
-    """View to retrieve shopping list content."""
+class TrackingListView(http.HomeAssistantView):
+    """View to retrieve tracking list content."""
 
-    url = "/api/shopping_list"
-    name = "api:shopping_list"
+    url = "/api/tracking_list"
+    name = "api:tracking_list"
 
     @callback
     def get(self, request):
-        """Retrieve shopping list items."""
+        """Retrieve tracking list items."""
         return self.json(request.app["hass"].data[DOMAIN].items)
 
 
-class UpdateShoppingListItemView(http.HomeAssistantView):
-    """View to retrieve shopping list content."""
+class UpdateTrackingListItemView(http.HomeAssistantView):
+    """View to retrieve tracking list content."""
 
-    url = "/api/shopping_list/item/{item_id}"
-    name = "api:shopping_list:item:id"
+    url = "/api/tracking_list/item/{item_id}"
+    name = "api:tracking_list:item:id"
 
     async def post(self, request, item_id):
-        """Update a shopping list item."""
+        """Update a tracking list item."""
         data = await request.json()
 
         try:
@@ -330,24 +330,24 @@ class UpdateShoppingListItemView(http.HomeAssistantView):
             return self.json_message("Item not found", HTTPStatus.BAD_REQUEST)
 
 
-class CreateShoppingListItemView(http.HomeAssistantView):
-    """View to retrieve shopping list content."""
+class CreateTrackingListItemView(http.HomeAssistantView):
+    """View to retrieve tracking list content."""
 
-    url = "/api/shopping_list/item"
-    name = "api:shopping_list:item"
+    url = "/api/tracking_list/item"
+    name = "api:tracking_list:item"
 
     @RequestDataValidator(vol.Schema({vol.Required("name"): str}))
     async def post(self, request, data):
-        """Create a new shopping list item."""
+        """Create a new tracking list item."""
         item = await request.app["hass"].data[DOMAIN].async_add(data["name"])
         return self.json(item)
 
 
 class ClearCompletedItemsView(http.HomeAssistantView):
-    """View to retrieve shopping list content."""
+    """View to retrieve tracking list content."""
 
-    url = "/api/shopping_list/clear_completed"
-    name = "api:shopping_list:clear_completed"
+    url = "/api/tracking_list/clear_completed"
+    name = "api:tracking_list:clear_completed"
 
     async def post(self, request):
         """Retrieve if API is running."""
@@ -362,7 +362,7 @@ def websocket_handle_items(
     connection: websocket_api.connection.ActiveConnection,
     msg: dict,
 ) -> None:
-    """Handle get shopping_list items."""
+    """Handle get tracking_list items."""
     connection.send_message(
         websocket_api.result_message(msg["id"], hass.data[DOMAIN].items)
     )
@@ -374,7 +374,7 @@ async def websocket_handle_add(
     connection: websocket_api.connection.ActiveConnection,
     msg: dict,
 ) -> None:
-    """Handle add item to shopping_list."""
+    """Handle add item to tracking_list."""
     item = await hass.data[DOMAIN].async_add(msg["name"], connection.context(msg))
     connection.send_message(websocket_api.result_message(msg["id"], item))
 
@@ -385,7 +385,7 @@ async def websocket_handle_update(
     connection: websocket_api.connection.ActiveConnection,
     msg: dict,
 ) -> None:
-    """Handle update shopping_list item."""
+    """Handle update tracking_list item."""
     msg_id = msg.pop("id")
     item_id = msg.pop("item_id")
     msg.pop("type")
@@ -408,14 +408,14 @@ async def websocket_handle_clear(
     connection: websocket_api.connection.ActiveConnection,
     msg: dict,
 ) -> None:
-    """Handle clearing shopping_list items."""
+    """Handle clearing tracking_list items."""
     await hass.data[DOMAIN].async_clear_completed(connection.context(msg))
     connection.send_message(websocket_api.result_message(msg["id"]))
 
 
 @websocket_api.websocket_command(
     {
-        vol.Required("type"): "shopping_list/items/reorder",
+        vol.Required("type"): "tracking_list/items/reorder",
         vol.Required("item_ids"): [str],
     }
 )
@@ -424,7 +424,7 @@ def websocket_handle_reorder(
     connection: websocket_api.connection.ActiveConnection,
     msg: dict,
 ) -> None:
-    """Handle reordering shopping_list items."""
+    """Handle reordering tracking_list items."""
     msg_id = msg.pop("id")
     try:
         hass.data[DOMAIN].async_reorder(msg.pop("item_ids"), connection.context(msg))
