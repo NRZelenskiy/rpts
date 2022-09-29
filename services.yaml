@@ -1,6 +1,6 @@
 add_item:
   name: Add item
-  description: Add an item to the shopping list.
+  description: Add an item to the tracking list.
   fields:
     name:
       name: Name
@@ -12,7 +12,7 @@ add_item:
 
 complete_item:
   name: Complete item
-  description: Mark an item as completed in the shopping list.
+  description: Mark an item as completed in the tracking list.
   fields:
     name:
       name: Name
@@ -24,7 +24,7 @@ complete_item:
 
 incomplete_item:
   name: Incomplete item
-  description: Marks an item as incomplete in the shopping list.
+  description: Marks an item as incomplete in the tracking list.
   fields:
     name:
       description: The name of the item to mark as incomplete.
@@ -35,12 +35,12 @@ incomplete_item:
 
 complete_all:
   name: Complete all
-  description: Marks all items as completed in the shopping list. It does not remove the items.
+  description: Marks all items as completed in the tracking list. It does not remove the items.
 
 incomplete_all:
   name: Incomplete all
-  description: Marks all items as incomplete in the shopping list.
+  description: Marks all items as incomplete in the tracking list.
 
 clear_completed_items:
   name: Clear completed items
-  description: Clear completed items from the shopping list.
+  description: Clear completed items from the tracking list.
