@@ -1,6 +1,6 @@
 {
-  "name": "SST Cloud integration",
-  "domains": ["binary_sensor", "sensor", "switch"],
-  "iot_class": "Cloud Polling",
+  "name": "Russian Post Tracking Servise",
+  "domains": ["tracking_list"],
+  "iot_class": "Tracking",
   "homeassistant": "2021.5.0"
 }
