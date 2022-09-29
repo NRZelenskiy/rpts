@@ -1,6 +1,6 @@
-"""All constants related to the shopping list component."""
-DOMAIN = "shopping_list"
-EVENT_SHOPPING_LIST_UPDATED = "shopping_list_updated"
+"""All constants related to the tracking list component."""
+DOMAIN = "tracking_list"
+EVENT_SHOPPING_LIST_UPDATED = "tracking_list_updated"
 
 SERVICE_ADD_ITEM = "add_item"
 SERVICE_COMPLETE_ITEM = "complete_item"
