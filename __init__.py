@@ -217,7 +217,7 @@ class TrackingData:
         return item
 
     async def async_update(self, item_id, info, context=None):
-        """Update a shopping list item."""
+        """Update a tracking list item."""
         item = next((itm for itm in self.items if itm["id"] == item_id), None)
 
         if item is None:
