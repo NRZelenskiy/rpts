@@ -31,7 +31,7 @@ ATTR_COMPLETE = "complete"
 _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = vol.Schema({DOMAIN: {}}, extra=vol.ALLOW_EXTRA)
 ITEM_UPDATE_SCHEMA = vol.Schema({ATTR_COMPLETE: bool, ATTR_NAME: str})
-PERSISTENCE = ".shopping_list.json"
+PERSISTENCE = ".tracking_list.json"
 
 SERVICE_ITEM_SCHEMA = vol.Schema({vol.Required(ATTR_NAME): vol.Any(None, cv.string)})
 SERVICE_LIST_SCHEMA = vol.Schema({})
@@ -42,7 +42,7 @@ WS_TYPE_TRACKING_LIST_UPDATE_ITEM = "trackingg_list/items/update"
 WS_TYPE_TRACKING_LIST_CLEAR_ITEMS = "tracking_list/items/clear"
 
 SCHEMA_WEBSOCKET_ITEMS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SHOPPING_LIST_ITEMS}
+    {vol.Required("type"): WS_TYPE_TRACKING_LIST_ITEMS}
 )
 
 SCHEMA_WEBSOCKET_ADD_ITEM = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
