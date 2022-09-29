@@ -163,7 +163,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.http.register_view(ClearCompletedItemsView)
 
     frontend.async_register_built_in_panel(
-        hass, "shopping-list", "shopping_list", "mdi:cart"
+        hass, "tracking-list", "tracking_list", "mdi:cart"
     )
 
     websocket_api.async_register_command(
